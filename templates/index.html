@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hospital Management</title>
+</head>
+<body>
+    <h2>Add Doctor</h2>
+
+    <form action="/add_doctor" method="post">
+        <input name="name" placeholder="Doctor name">
+        <input name="spec" placeholder="Specialization">
+        <button>Add</button>
+    </form>
+
+    <h2>Appointments</h2>
+
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Date</th>
+        </tr>
+
+        {% for row in data %}
+        <tr>
+            <td>{{ row.id }}</td>
+            <td>{{ row.patient }}</td>
+            <td>{{ row.doctor }}</td>
+            <td>{{ row.date }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
