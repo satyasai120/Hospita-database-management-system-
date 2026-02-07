@@ -1,15 +1,15 @@
-from django import db
 from flask import Flask, render_template, request, redirect
 import sqlite3
+import os
 
 app = Flask(__name__)
-with app.app_context():
-    db.create_all()
- 
 
+# Correct DB path for Render
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "hospital.db")
 
 def get_db():
-    conn = sqlite3.connect("hospital.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -20,8 +20,8 @@ def home():
     data = conn.execute("""
         SELECT a.id, p.name as patient, d.name as doctor, a.date
         FROM appointments a
-        JOIN patients p ON p.id=a.patient_id
-        JOIN doctors d ON d.id=a.doctor_id
+        JOIN patients p ON p.id = a.patient_id
+        JOIN doctors d ON d.id = a.doctor_id
     """).fetchall()
     return render_template("index.html", data=data)
 
@@ -32,22 +32,13 @@ def add_doctor():
     spec = request.form["spec"]
 
     conn = get_db()
-    conn.execute("INSERT INTO doctors(name, specialization) VALUES (?,?)", (name, spec))
+    conn.execute(
+        "INSERT INTO doctors(name, specialization) VALUES (?, ?)",
+        (name, spec)
+    )
     conn.commit()
     return redirect("/")
 
 
 if __name__ == "__main__":
-    app.run()
-
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-
-app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
- 
+    app.run(host="0.0.0.0", port=5000)
