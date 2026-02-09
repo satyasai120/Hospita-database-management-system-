@@ -1,22 +1,54 @@
 from flask import Flask, render_template, request, redirect
-from flask_sqlalchemy import SQLAlchemy
 import sqlite3
 import os
 
-
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URL'] = 'sqlite:///database.db'
-db = SQLAlchemy(app)
-
-# Correct DB path for Render
+# DB path (works on Render)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "hospital.db")
+
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+# ✅ CREATE TABLES AUTOMATICALLY
+def init_db():
+    conn = get_db()
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS patients(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT
+    )
+    """)
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS doctors(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        specialization TEXT
+    )
+    """)
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS appointments(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        patient_id INTEGER,
+        doctor_id INTEGER,
+        date TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+# run once at startup
+init_db()
 
 
 @app.route("/")
@@ -43,9 +75,6 @@ def add_doctor():
     )
     conn.commit()
     return redirect("/")
-
-with app.app_context():
-    db.create_all()
 
 
 if __name__ == "__main__":
