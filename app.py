@@ -1,8 +1,13 @@
 from flask import Flask, render_template, request, redirect
+from flask_sqlalchemy import SQLAlchemy
 import sqlite3
 import os
 
+
 app = Flask(__name__)
+
+app.config['SQLALCHEMY_DATABASE_URL'] = 'sqlite:///database.db'
+db = SQLAlchemy(app)
 
 # Correct DB path for Render
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +43,9 @@ def add_doctor():
     )
     conn.commit()
     return redirect("/")
+
+with app.app_context():
+    db.create_all()
 
 
 if __name__ == "__main__":
